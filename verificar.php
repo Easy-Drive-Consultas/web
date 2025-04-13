@@ -2,7 +2,7 @@
 session_start();
 
 // Ruta del archivo CSV
-$archivo_csv = $_SERVER['DOCUMENT_ROOT'] . '/data.csv'; // Ruta absoluta
+/home/usuario/public_html/data.csv; // Ruta absoluta
 
 // Comprobar si el archivo CSV existe
 if (file_exists($archivo_csv)) {
@@ -93,7 +93,7 @@ function mostrarMensaje($mensaje, $color = "#dc3545", $icono = "❌") {
     </head>
     <body>
         <div class='container'>
-            <img src='img/logo.png' alt='Logo de la empresa' class='logo'>
+            <img src="logo.png" alt="" class="logo">
             <h3>$icono $mensaje</h3>
             <a href='index.php'>Volver</a>
         </div>
@@ -174,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </head>
         <body>
             <div class='container'>
-                <img src='img/logo.png' alt='Logo de la empresa' class='logo'>
+                <img src="logo.png" alt="" class="logo">
                 <h3>$icono Hola $nombre $apellido, $mensaje</h3>
                 <a href='index.php'>Volver</a>
             </div>
