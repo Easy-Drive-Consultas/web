@@ -2,7 +2,11 @@
 session_start();
 
 // Ruta del archivo CSV
-/home/usuario/public_html/data.csv; // Ruta absoluta
+/public_html
+│
+├── index.php
+├── verificar.php
+└── data.csv // Ruta absoluta
 
 // Comprobar si el archivo CSV existe
 if (file_exists($archivo_csv)) {
