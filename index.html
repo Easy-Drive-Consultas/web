@@ -25,7 +25,7 @@
         }
 
         .logo {
-            width: 360px; /* Tamaño aumentado 3x */
+            width: 360px;
             height: auto;
             margin-bottom: 20px;
         }
@@ -53,7 +53,7 @@
         }
 
         button {
-            background-color: #e60000; /* Rojo vivo */
+            background-color: #e60000;
             color: white;
             padding: 10px 25px;
             border: none;
@@ -64,19 +64,67 @@
         }
 
         button:hover {
-            background-color: #b30000; /* Rojo más oscuro al pasar el cursor */
+            background-color: #b30000;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="logo.png" alt="" class="logo">
+        <img src="img/logo.png" alt="Logo de la empresa" class="logo">
         <h2>Consulta de Certificado</h2>
-        <form action="verificar.php" method="POST">
-            <label for="documento">Número de Documento:</label>
-            <input type="text" id="documento" name="documento" required>
-            <button type="submit">Consultar</button>
-        </form>
+        <label for="documento">Número de Documento:</label>
+        <input type="text" id="documento" placeholder="Ingrese su cédula o pasaporte">
+        <button onclick="buscarCertificado()">Consultar</button>
+        <div class="resultado" id="resultado"></div>
     </div>
+
+    <script>
+        let certificados = {};
+
+        // Cargar CSV al iniciar
+        fetch('data.csv')
+            .then(response => response.text())
+            .then(csv => {
+                const lineas = csv.trim().split('\n');
+                lineas.forEach(linea => {
+                    const [doc, nombre, apellido, estado] = linea.split(',');
+                    certificados[doc] = {
+                        nombre,
+                        apellido,
+                        estado: parseInt(estado)
+                    };
+                });
+            });
+
+        function buscarCertificado() {
+            const doc = document.getElementById('documento').value.trim();
+            const resultado = document.getElementById('resultado');
+
+            if (!certificados[doc]) {
+                resultado.innerHTML = "❌ Documento no encontrado. 🚗";
+                resultado.style.color = "#dc3545";
+                return;
+            }
+
+            const { nombre, apellido, estado } = certificados[doc];
+
+            const mensajes = {
+                1: ["¡Tu certificado ya está disponible en la escuela para ser retirado! 🚗", "#28a745", "✅"],
+                2: [`El certificado vinculado al número <strong>${doc}</strong> está en proceso de registro en la Autoridad de Tránsito. ¡Pronto estará listo! 🚗`, "#ffc107", "⏳"],
+                3: ["Tu certificado está siendo impreso en este momento. ¡Ya casi está listo para ser enviado a la Autoridad de Tránsito! 🚗", "#17a2b8", "🖨️"],
+                4: ["El certificado aún no está disponible, ya que el proceso académico no ha finalizado. Por favor, vuelve a consultar más adelante. 🚗", "#dc3545", "❌"]
+            };
+
+            const [mensaje, color, icono] = mensajes[estado] || ["Estado desconocido", "#6c757d", "❓"];
+            resultado.innerHTML = `${icono} Hola <strong>${nombre} ${apellido}</strong>, ${mensaje}`;
+            resultado.style.color = color;
+        }
+    </script>
 </body>
 </html>
