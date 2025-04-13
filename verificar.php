@@ -1,193 +1,120 @@
-<?php
-session_start();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Certificado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-// Ruta del archivo CSV
-/public_html
-│
-├── index.php
-├── verificar.php
-└── data.csv // Ruta absoluta
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
 
-// Comprobar si el archivo CSV existe
-if (file_exists($archivo_csv)) {
-    $archivo = fopen($archivo_csv, 'r');
-    $certificados = [];
+        .logo {
+            width: 360px;
+            height: auto;
+            margin-bottom: 20px;
+        }
 
-    while (($linea = fgetcsv($archivo)) !== FALSE) {
-        $documento = $linea[0];
-        $nombre = $linea[1];
-        $apellido = $linea[2];
-        $estado = (int)$linea[3];
+        h2 {
+            margin-bottom: 20px;
+            color: #333333;
+        }
 
-        $certificados[$documento] = [
-            'nombre' => $nombre,
-            'apellido' => $apellido,
-            'estado' => $estado
-        ];
-    }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
 
-    fclose($archivo);
-    $_SESSION['certificados'] = $certificados;
-} else {
-    echo "Error: El archivo de datos no se encuentra.";
-    exit();
-}
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
 
-if (!isset($_SESSION['certificados'])) {
-    echo "<h3>No se han cargado los datos de los certificados. Por favor, cargue un archivo CSV.</h3>";
-    exit();
-}
+        button:hover {
+            background-color: #0056b3;
+        }
 
-$certificados = $_SESSION['certificados'];
+        .resultado {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="img/logo.png" alt="Logo de la empresa" class="logo">
+        <h2>Consulta de Certificado</h2>
+        <input type="text" id="documento" placeholder="Ingrese su número de cédula o pasaporte" required>
+        <button onclick="buscarCertificado()">Consultar</button>
+        <div class="resultado" id="resultado"></div>
+    </div>
 
-// Función para mostrar mensajes con formato
-function mostrarMensaje($mensaje, $color = "#dc3545", $icono = "❌") {
-    echo "<!DOCTYPE html>
-    <html lang='es'>
-    <head>
-        <meta charset='UTF-8'>
-        <title>Resultado de Consulta</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f2f4f8;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
+    <script>
+        let certificados = {};
+
+        // Cargar el CSV al iniciar
+        fetch('data.csv')
+            .then(response => response.text())
+            .then(data => {
+                const filas = data.trim().split('\n');
+                filas.forEach(fila => {
+                    const [documento, nombre, apellido, estado] = fila.split(',');
+                    certificados[documento] = {
+                        nombre,
+                        apellido,
+                        estado: parseInt(estado)
+                    };
+                });
+            });
+
+        function buscarCertificado() {
+            const doc = document.getElementById('documento').value.trim();
+            const resultado = document.getElementById('resultado');
+
+            if (!doc || !certificados[doc]) {
+                resultado.innerHTML = "❌ Documento no encontrado. 🚗";
+                resultado.style.color = "#dc3545";
+                return;
             }
 
-            .container {
-                background-color: #ffffff;
-                padding: 30px 40px;
-                border-radius: 15px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                text-align: center;
-                width: 100%;
-                max-width: 500px;
-            }
+            const datos = certificados[doc];
+            const mensajes = {
+                1: ["¡Tu certificado ya está disponible en la escuela para ser retirado! 🚗", "#28a745", "✅"],
+                2: [`El certificado vinculado al número <strong>${doc}</strong> está en proceso de registro en la Autoridad de Tránsito. ¡Pronto estará listo! 🚗`, "#ffc107", "⏳"],
+                3: ["Tu certificado está siendo impreso en este momento. ¡Ya casi está listo para ser enviado a la Autoridad de Tránsito! 🚗", "#17a2b8", "🖨️"],
+                4: ["El certificado aún no está disponible, ya que el proceso académico no ha finalizado. Por favor, vuelve a consultar más adelante. 🚗", "#dc3545", "❌"]
+            };
 
-            .logo {
-                width: 360px;
-                height: auto;
-                margin-bottom: 20px;
-            }
-
-            h3 {
-                margin-bottom: 20px;
-                color: {$color};
-            }
-
-            a {
-                display: inline-block;
-                margin-top: 20px;
-                padding: 10px 20px;
-                background-color: #e60000; /* Rojo vivo */
-                color: white;
-                text-decoration: none;
-                border-radius: 8px;
-                transition: background-color 0.3s ease;
-            }
-
-            a:hover {
-                background-color: #b30000;
-            }
-        </style>
-    </head>
-    <body>
-        <div class='container'>
-            <img src="logo.png" alt="" class="logo">
-            <h3>$icono $mensaje</h3>
-            <a href='index.php'>Volver</a>
-        </div>
-    </body>
-    </html>";
-    exit();
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $documento = $_POST['documento'];
-
-    if (array_key_exists($documento, $certificados)) {
-        $estado = $certificados[$documento]['estado'];
-        $nombre = $certificados[$documento]['nombre'];
-        $apellido = $certificados[$documento]['apellido'];
-
-        $mensajes = [
-            1 => ["¡Tu certificado ya está disponible en la escuela para ser retirado! 🚗", "#28a745", "✅"],
-            2 => ["El certificado vinculado al número de cédula o pasaporte <strong>$documento</strong> está en proceso de registro en la Autoridad de Tránsito. ¡Pronto estará listo! 🚗", "#ffc107", "⏳"],
-            3 => ["Tu certificado está siendo impreso en este momento. ¡Ya casi está listo para ser enviado a la Autoridad de Tránsito! 🚗", "#17a2b8", "🖨️"],
-            4 => ["El certificado aún no está disponible, ya que el proceso académico no ha finalizado. Por favor, vuelve a consultar más adelante. 🚗", "#dc3545", "❌"],
-        ];
-
-        [$mensaje, $color, $icono] = $mensajes[$estado];
-
-        echo "<!DOCTYPE html>
-        <html lang='es'>
-        <head>
-            <meta charset='UTF-8'>
-            <title>Resultado de Consulta</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f2f4f8;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    margin: 0;
-                }
-
-                .container {
-                    background-color: #ffffff;
-                    padding: 30px 40px;
-                    border-radius: 15px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    text-align: center;
-                    width: 100%;
-                    max-width: 500px;
-                }
-
-                .logo {
-                    width: 360px;
-                    height: auto;
-                    margin-bottom: 20px;
-                }
-
-                h3 {
-                    margin-bottom: 20px;
-                    color: {$color};
-                }
-
-                a {
-                    display: inline-block;
-                    margin-top: 20px;
-                    padding: 10px 20px;
-                    background-color: #e60000; /* Rojo vivo */
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    transition: background-color 0.3s ease;
-                }
-
-                a:hover {
-                    background-color: #b30000;
-                }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <img src="logo.png" alt="" class="logo">
-                <h3>$icono Hola $nombre $apellido, $mensaje</h3>
-                <a href='index.php'>Volver</a>
-            </div>
-        </body>
-        </html>";
-    } else {
-        mostrarMensaje("Cédula o pasaporte no encontrado.");
-    }
-} else {
-    mostrarMensaje("Acceso no permitido.");
-}
-?>
+            const [mensaje, color, icono] = mensajes[datos.estado] || ["Estado desconocido", "#6c757d", "❓"];
+            resultado.innerHTML = `${icono} Hola <strong>${datos.nombre} ${datos.apellido}</strong>, ${mensaje}`;
+            resultado.style.color = color;
+        }
+    </script>
+</body>
+</html>
