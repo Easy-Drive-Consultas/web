@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Certificado</title>
     <style>
         body {
@@ -12,11 +13,12 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            padding: 20px;
         }
 
         .container {
             background-color: #ffffff;
-            padding: 30px 40px;
+            padding: 25px 20px;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
@@ -25,7 +27,8 @@
         }
 
         .logo {
-            width: 360px;
+            width: 100%;
+            max-width: 280px;
             height: auto;
             margin-bottom: 20px;
         }
@@ -33,6 +36,7 @@
         h2 {
             margin-bottom: 20px;
             color: #333333;
+            font-size: 1.5rem;
         }
 
         label {
@@ -40,6 +44,7 @@
             margin-bottom: 8px;
             font-weight: bold;
             color: #555;
+            text-align: left;
         }
 
         input[type="text"] {
@@ -49,17 +54,18 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 1rem;
         }
 
         button {
             background-color: #e60000;
             color: white;
-            padding: 10px 25px;
+            padding: 12px;
+            width: 100%;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1rem;
             transition: background-color 0.3s ease;
         }
 
@@ -69,14 +75,14 @@
 
         .resultado {
             margin-top: 20px;
-            font-size: 16px;
+            font-size: 1rem;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="logo.png" alt="" class="logo">
+                <img src="logo.png" alt="" class="logo">
         <h2>Consulta de Certificado</h2>
         <label for="documento">Número de Documento:</label>
         <input type="text" id="documento" placeholder="Ingrese su cédula o pasaporte">
@@ -87,11 +93,10 @@
     <script>
         let certificados = {};
 
-        // Cargar CSV al iniciar
         fetch('data.csv')
             .then(response => response.text())
             .then(csv => {
-                const lineas = csv.trim().split('\n');
+                const lineas = csv.trim().split('\\n');
                 lineas.forEach(linea => {
                     const [doc, nombre, apellido, estado] = linea.split(',');
                     certificados[doc] = {
@@ -113,7 +118,6 @@
             }
 
             const { nombre, apellido, estado } = certificados[doc];
-
             const mensajes = {
                 1: ["¡Tu certificado ya está disponible en la escuela para ser retirado! 🚗", "#28a745", "✅"],
                 2: [`El certificado vinculado al número <strong>${doc}</strong> está en proceso de registro en la Autoridad de Tránsito. ¡Pronto estará listo! 🚗`, "#ffc107", "⏳"],
